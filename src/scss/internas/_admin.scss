@@ -1,0 +1,57 @@
+.alerta {
+  padding: 0.5rem;
+  text-align: center;
+  color: $blanco;
+  font-weight: $bold;
+  text-transform: uppercase;
+  margin: 1rem 0;
+
+  &.error {
+    background-color: $rojo;
+  }
+
+  &.exito {
+    background-color: $verde;
+  }
+}
+
+table.propiedades {
+  margin-top: 4rem;
+  width: 100%;
+  border-spacing: 0;
+  thead {
+    background-color: $verde;
+
+    th {
+      color: $blanco;
+      padding: 2rem;
+    }
+  }
+  .vendedores{
+    background-color: $amarillo;
+  }
+  tbody {
+    tr {
+      border-bottom: 1px solid $gris;
+
+      td {
+        padding: 1rem;
+        text-align: center;
+        vertical-align: middle; // Asegura que el texto e imagen se alineen al centro vertical
+        color: $negro;
+      }
+    }
+  }
+
+  .imagen-tabla {
+    width: 15rem;
+    display: block;      // La convertimos en bloque
+    margin: 0 auto;
+  }
+
+ 
+}
+
+.imagen-small {
+  width: 20rem;
+}
