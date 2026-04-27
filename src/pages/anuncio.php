@@ -11,19 +11,14 @@
     require '../../includes/config/database.php';
     $db = conectarDB();
 
-
     // consultar
-    $query = "SELECT * FROM propiedades WHERE id = {$id}";
+    $stmt = $db->prepare("SELECT * FROM propiedades WHERE id = :id");
+    $stmt->execute(['id' => $id]);
+    $propiedad = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // obtener resultado
-    $resultado = mysqli_query($db, $query);
-
-    if(!$resultado->num_rows) {
+    if(!$propiedad) {
         header('Location: /');
     } 
-    
-    $propiedad = mysqli_fetch_assoc($resultado);
-
 
     require '../../includes/funciones.php';
     incluirTemplate('header');
@@ -57,7 +52,5 @@
     </main>
 
 <?php 
-    mysqli_close($db);
-
     incluirTemplate('footer');
 ?>

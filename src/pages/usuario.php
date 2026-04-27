@@ -12,9 +12,13 @@ $passwordHash = password_hash($password, PASSWORD_BCRYPT);
 
 
 // Query para crear el usuario
-$query = " INSERT INTO usuarios (email, password) VALUES ( '{$email}', '{$passwordHash}'); ";
+$query = " INSERT INTO usuarios (email, password) VALUES ( :email, :password); ";
 
 // echo $query;
 
 // Agregarlo a la base de datos
-mysqli_query($db, $query);
+$stmt = $db->prepare($query);
+$stmt->execute([
+    'email' => $email,
+    'password' => $passwordHash
+]);

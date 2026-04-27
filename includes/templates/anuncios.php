@@ -7,14 +7,14 @@
     // consultar
     $query = "SELECT * FROM propiedades LIMIT {$limite}";
 
-    // obtener resultado
-    $resultado = mysqli_query($db, $query);
+    // obtener resultado G6mFHnKTpZUAfORK
+    $resultado = $db->query($query);
 
 
 ?>
 
 <div class="contenedor-anuncios">
-        <?php while($propiedad = mysqli_fetch_assoc($resultado)): ?>
+        <?php while($propiedad = $resultado->fetch(PDO::FETCH_ASSOC)): ?>
         <div class="anuncio">
 
             <img loading="lazy" src="../../imagenes/<?php echo $propiedad['imagen']; ?>" alt="anuncio">
@@ -49,6 +49,4 @@
 
 <?php 
 
-    // Cerrar la conexión
-    mysqli_close($db);
 ?>

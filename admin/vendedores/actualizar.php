@@ -17,20 +17,21 @@
     $db = conectarDB();
 
     // Obtener datos del vendedor
-    $consulta = "SELECT * FROM vendedores WHERE id = {$id}";
-    $resultado = mysqli_query($db, $consulta);
-    $vendedor = mysqli_fetch_assoc($resultado);
+    $stmt = $db->prepare("SELECT * FROM vendedores WHERE id = :id");
+    $stmt->execute(['id' => $id]);
+    $vendedor = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if(!$vendedor) { header('Location: /admin'); exit; }
 
     $errores = [];
-
     $nombre = $vendedor['nombre'];
     $apellido = $vendedor['apellido'];
     $telefono = $vendedor['telefono'];
 
     if($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $nombre = mysqli_real_escape_string($db, $_POST['nombre']);
-        $apellido = mysqli_real_escape_string($db, $_POST['apellido']);
-        $telefono = mysqli_real_escape_string($db, $_POST['telefono']);
+        $nombre = $_POST['nombre'] ?? '';
+        $apellido = $_POST['apellido'] ?? '';
+        $telefono = $_POST['telefono'] ?? '';
 
         if(!$nombre) {
             $errores[] = "El nombre es obligatorio";
@@ -46,8 +47,14 @@
         }
 
         if(empty($errores)) {
-            $query = "UPDATE vendedores SET nombre = '{$nombre}', apellido = '{$apellido}', telefono = '{$telefono}' WHERE id = {$id}";
-            $resultado = mysqli_query($db, $query);
+            $query = "UPDATE vendedores SET nombre = :nombre, apellido = :apellido, telefono = :telefono WHERE id = :id";
+            $stmt = $db->prepare($query);
+            $resultado = $stmt->execute([
+                'nombre' => $nombre,
+                'apellido' => $apellido,
+                'telefono' => $telefono,
+                'id' => $id
+            ]);
 
             if($resultado) {
                 header('Location: /admin/vendedores/index.php?resultado=2');

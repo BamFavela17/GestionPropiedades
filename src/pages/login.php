@@ -11,8 +11,8 @@
         // var_dump($_POST);
         // echo "</pre>";
 
-        $email = mysqli_real_escape_string($db,  filter_var( $_POST['email'], FILTER_VALIDATE_EMAIL) );
-        $password = mysqli_real_escape_string($db,  $_POST['password']);
+        $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
+        $password = $_POST['password'];
 
         if(!$email) {
             $errores[] = "El email es obligatorio o no es válido";
@@ -25,15 +25,14 @@
         if(empty($errores)) {
 
             // Revisar si el usuario existe.
-            $query = "SELECT * FROM usuarios WHERE email = '{$email}' ";
-            $resultado = mysqli_query($db, $query);
-
+            $stmt = $db->prepare("SELECT * FROM usuarios WHERE email = :email");
+            $stmt->execute(['email' => $email]);
+            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
             
 
-            if( $resultado->num_rows ) {
+            if($usuario) {
                 // Revisar si el password es correcto
-                $usuario = mysqli_fetch_assoc($resultado);
 
                 // var_dump($usuario['password']);
 
@@ -91,6 +90,8 @@
         
             <input type="submit" value="Iniciar Sesión" class="boton boton-verde">
         </form>
+
+        <p>¿No tienes una cuenta? <a href="/src/pages/register.php">Regístrate aquí</a></p>
     </main>
 
 <?php 

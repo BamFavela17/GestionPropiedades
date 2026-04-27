@@ -40,6 +40,7 @@
                         <?php endif; ?>
                          <?php if(!$auth): ?>
                             <a href="/src/pages/login.php">Iniciar Sesión</a>
+                            <a href="/src/pages/register.php">Registrarse</a>
                         <?php endif; ?>
                     </nav>
                 </div>

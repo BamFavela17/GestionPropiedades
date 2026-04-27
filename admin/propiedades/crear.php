@@ -12,8 +12,7 @@
     $db = conectarDB();
 
     // Consultar para obtener los vendedores
-    $consulta = "SELECT * FROM vendedores";
-    $resultado = mysqli_query($db, $consulta);
+    $resultadoVendedores = $db->query("SELECT * FROM vendedores");
 
     // Arreglo con mensajes de errores
     $errores = [];
@@ -33,18 +32,13 @@
         // var_dump($_POST);
         // echo "</pre>";
 
-        echo "<pre>";
-        var_dump($_FILES);
-        echo "</pre>";
-
-
-        $titulo = mysqli_real_escape_string( $db,  $_POST['titulo'] );
-        $precio = mysqli_real_escape_string( $db,  $_POST['precio'] );
-        $descripcion = mysqli_real_escape_string( $db,  $_POST['descripcion'] );
-        $habitaciones = mysqli_real_escape_string( $db,  $_POST['habitaciones'] );
-        $wc = mysqli_real_escape_string( $db,  $_POST['wc'] );
-        $estacionamiento = mysqli_real_escape_string( $db,  $_POST['estacionamiento'] );
-        $vendedorId = mysqli_real_escape_string( $db,  $_POST['vendedor'] );
+        $titulo = $_POST['titulo'] ?? '';
+        $precio = $_POST['precio'] ?? '';
+        $descripcion = $_POST['descripcion'] ?? '';
+        $habitaciones = $_POST['habitaciones'] ?? '';
+        $wc = $_POST['wc'] ?? '';
+        $estacionamiento = $_POST['estacionamiento'] ?? '';
+        $vendedorId = $_POST['vendedor'] ?? '';
         $creado = date('Y/m/d');
 
         // Asignar files hacia una variable
@@ -118,13 +112,22 @@
             // Subir la imagen
             move_uploaded_file($imagen['tmp_name'], $carpetaImagenes . $nombreImagen );
  
-
-            // Insertar en la base de datos
-            $query = " INSERT INTO propiedades (titulo, precio, imagen, descripcion, habitaciones, wc, estacionamiento, creado, vendedorId ) VALUES ( '$titulo', '$precio', '$nombreImagen', '$descripcion', '$habitaciones', '$wc', '$estacionamiento', '$creado', '$vendedorId' ) ";
-                
-            // echo $query;
-
-            $resultado = mysqli_query($db, $query);
+            // Insertar en la base de datos con PDO y sentencias preparadas (Compatible con PostgreSQL/Supabase)
+            $query = " INSERT INTO propiedades (titulo, precio, imagen, descripcion, habitaciones, wc, estacionamiento, creado, \"vendedorId\" ) 
+                       VALUES ( :titulo, :precio, :imagen, :descripcion, :habitaciones, :wc, :estacionamiento, :creado, :vendedorId ) ";
+            
+            $stmt = $db->prepare($query);
+            $resultado = $stmt->execute([
+                'titulo' => $titulo,
+                'precio' => $precio,
+                'imagen' => $nombreImagen,
+                'descripcion' => $descripcion,
+                'habitaciones' => $habitaciones,
+                'wc' => $wc,
+                'estacionamiento' => $estacionamiento,
+                'creado' => $creado,
+                'vendedorId' => $vendedorId
+            ]);
 
             if($resultado) {
                 // Redireccionar al usuario.
@@ -193,7 +196,7 @@
 
                 <select name="vendedor">
                     <option value="">-- Seleccione --</option>
-                    <?php while($vendedor =  mysqli_fetch_assoc($resultado) ) : ?>
+                    <?php while($vendedor =  $resultadoVendedores->fetch(PDO::FETCH_ASSOC) ) : ?>
                         <option  <?php echo $vendedorId === $vendedor['id'] ? 'selected' : ''; ?>   value="<?php echo $vendedor['id']; ?>"> <?php echo $vendedor['nombre'] . " " . $vendedor['apellido']; ?> </option>
                     <?php endwhile; ?>
                 </select>

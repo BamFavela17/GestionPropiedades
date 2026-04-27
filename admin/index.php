@@ -15,7 +15,7 @@
     $query = "SELECT * FROM propiedades";
 
     // Consultar la BD 
-    $resultadoConsulta = mysqli_query($db, $query);
+    $resultadoConsulta = $db->query($query);
 
 
     // Muestra mensaje condicional
@@ -31,16 +31,19 @@
         if($id) {
 
             // Eliminar el archivo
-            $query = "SELECT imagen FROM propiedades WHERE id = {$id}";
-
-            $resultado = mysqli_query($db, $query);
-            $propiedad = mysqli_fetch_assoc($resultado);
+            $stmt = $db->prepare("SELECT imagen FROM propiedades WHERE id = :id");
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            $propiedad = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            unlink('../imagenes/' . $propiedad['imagen']);
+            if ($propiedad && file_exists('../imagenes/' . $propiedad['imagen'])) {
+                unlink('../imagenes/' . $propiedad['imagen']);
+            }
     
             // Eliminar la propiedad
-            $query = "DELETE FROM propiedades WHERE id = {$id}";
-            $resultado = mysqli_query($db, $query);
+            $stmt = $db->prepare("DELETE FROM propiedades WHERE id = :id");
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $resultado = $stmt->execute();
 
             if($resultado) {
                 header('location: /admin?resultado=3');
@@ -81,7 +84,7 @@
             </thead>
 
             <tbody> <!-- Mostrar los Resultados -->
-                <?php while( $propiedad = mysqli_fetch_assoc($resultadoConsulta)): ?>
+                <?php while( $propiedad = $resultadoConsulta->fetch(PDO::FETCH_ASSOC)): ?>
                 <tr>
                     <td><?php echo $propiedad['id']; ?></td>
                     <td><?php echo $propiedad['titulo']; ?></td>
@@ -105,8 +108,6 @@
 
 <?php 
 
-    // Cerrar la conexion
-    mysqli_close($db);
 
     incluirTemplate('footer');
 ?>

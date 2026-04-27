@@ -20,14 +20,16 @@
     $db = conectarDB();
 
     // Obtener los datos de la propiedad
-    $consulta = "SELECT * FROM propiedades WHERE id = {$id}";
-    $resultado = mysqli_query($db, $consulta);
-    $propiedad = mysqli_fetch_assoc($resultado);
+    $stmt = $db->prepare("SELECT * FROM propiedades WHERE id = :id");
+    $stmt->execute(['id' => $id]);
+    $propiedad = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    if(!$propiedad) {
+        header('Location: /admin');
+    }
 
     // Consultar para obtener los vendedores
-    $consulta = "SELECT * FROM vendedores";
-    $resultado = mysqli_query($db, $consulta);
+    $resultadoVendedores = $db->query("SELECT * FROM vendedores");
 
     // Arreglo con mensajes de errores
     $errores = [];
@@ -53,13 +55,13 @@
         // echo "</pre>";
 
 
-        $titulo = mysqli_real_escape_string( $db,  $_POST['titulo'] );
-        $precio = mysqli_real_escape_string( $db,  $_POST['precio'] );
-        $descripcion = mysqli_real_escape_string( $db,  $_POST['descripcion'] );
-        $habitaciones = mysqli_real_escape_string( $db,  $_POST['habitaciones'] );
-        $wc = mysqli_real_escape_string( $db,  $_POST['wc'] );
-        $estacionamiento = mysqli_real_escape_string( $db,  $_POST['estacionamiento'] );
-        $vendedorId = mysqli_real_escape_string( $db,  $_POST['vendedor'] );
+        $titulo = $_POST['titulo'] ?? '';
+        $precio = $_POST['precio'] ?? '';
+        $descripcion = $_POST['descripcion'] ?? '';
+        $habitaciones = $_POST['habitaciones'] ?? '';
+        $wc = $_POST['wc'] ?? '';
+        $estacionamiento = $_POST['estacionamiento'] ?? '';
+        $vendedorId = $_POST['vendedor'] ?? '';
         $creado = date('Y/m/d');
 
         // Asignar files hacia una variable
@@ -135,9 +137,23 @@
             }
 
             // Insertar en la base de datos
-            $query = " UPDATE propiedades SET titulo = '{$titulo}', precio = '{$precio}', imagen = '{$nombreImagen}', descripcion = '{$descripcion}', habitaciones = {$habitaciones}, wc = {$wc}, estacionamiento = {$estacionamiento}, vendedorId = {$vendedorId} WHERE id = {$id} ";
-
-            $resultado = mysqli_query($db, $query);
+            $query = " UPDATE propiedades SET titulo = :titulo, precio = :precio, imagen = :imagen, descripcion = :descripcion, habitaciones = :habitaciones, wc = :wc, estacionamiento = :estacionamiento, \"vendedorId\" = :vendedorId WHERE id = :id ";
+            
+            $stmt = $db->prepare($query);
+            $resultado = $stmt->execute([
+                'titulo' => $titulo,
+                'precio' => $precio,
+                'imagen' => $nombreImagen,
+                'descripcion' => $descripcion,
+                'habitaciones' => $habitaciones,
+                'wc' => $wc,
+                'estacionamiento' => $estacionamiento,
+                'vendedorId' => $vendedorId,
+                'id' => $id
+            ]);
+            // if (!$resultado) {
+            //     print_r($stmt->errorInfo());
+            // }
 
             if($resultado) {
                 // Redireccionar al usuario.
@@ -212,7 +228,7 @@
 
                 <select name="vendedor">
                     <option value="">-- Seleccione --</option>
-                    <?php while($vendedor =  mysqli_fetch_assoc($resultado) ) : ?>
+                    <?php while($vendedor =  $resultadoVendedores->fetch(PDO::FETCH_ASSOC) ) : ?>
                         <option  <?php echo $vendedorId == $vendedor['id'] ? 'selected' : ''; ?>   value="<?php echo $vendedor['id']; ?>"> <?php echo $vendedor['nombre'] . " " . $vendedor['apellido']; ?> </option>
                     <?php endwhile; ?>
                 </select>

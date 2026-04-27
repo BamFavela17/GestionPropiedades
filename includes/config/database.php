@@ -1,25 +1,39 @@
 <?php 
 
-function conectarDB() : mysqli {
-    // Activa el modo de excepciones para MySQLi
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-
+function conectarDB() : PDO {
     try {
-        $db = mysqli_connect(
-            'sql208.infinityfree.com', 
-            'if0_41749033', 
-            'KigdNzMFJ1os5aZ', 
-            'if0_41749033_bienesraices_crud'
-        );
+        // Carga manual de .env (ajustado a la ubicación del archivo)
+        $envFile = __DIR__ . '/../templates/.env';
+        if (file_exists($envFile)) {
+            $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($lines as $line) {
+                if (strpos(trim($line), '#') === 0) continue;
+                list($name, $value) = explode('=', $line, 2);
+                putenv(trim($name) . "=" . trim($value));
+            }
+        }
 
-        // Forzar el set de caracteres a UTF-8 para evitar problemas con tildes y ñ
-        mysqli_set_charset($db, 'utf8');
+        // Configuración de Supabase (PostgreSQL)
+        $host = getenv('DB_HOST');
+        $user = getenv('DB_USER');
+        $pass = getenv('DB_PASS');
+        $dbName = getenv('DB_NAME');
+        $port = getenv('DB_PORT');
+        $dsn = "pgsql:host=$host;port=$port;dbname=$dbName;sslmode=require";
+
+        // Crear la conexión con PDO
+        $db = new PDO($dsn, $user, $pass);
+        
+        // Configurar para que lance excepciones en caso de error
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Forzar codificación UTF-8 en PostgreSQL
+        $db->exec("SET NAMES 'UTF8'");
 
         return $db;
 
-    } catch (mysqli_sql_exception $e) {
+    } catch (PDOException $e) {
         echo "Error: No se pudo conectar a la base de datos.";
-        // En desarrollo puedes usar: exit($e->getMessage());
         exit;
     }
 }

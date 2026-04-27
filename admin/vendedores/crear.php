@@ -16,9 +16,9 @@
     $telefono = '';
 
     if($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $nombre = mysqli_real_escape_string($db, $_POST['nombre']);
-        $apellido = mysqli_real_escape_string($db, $_POST['apellido']);
-        $telefono = mysqli_real_escape_string($db, $_POST['telefono']);
+        $nombre = $_POST['nombre'] ?? '';
+        $apellido = $_POST['apellido'] ?? '';
+        $telefono = $_POST['telefono'] ?? '';
 
         if(!$nombre) {
             $errores[] = "El nombre es obligatorio";
@@ -34,8 +34,13 @@
         }
 
         if(empty($errores)) {
-            $query = "INSERT INTO vendedores (nombre, apellido, telefono) VALUES ('{$nombre}', '{$apellido}', '{$telefono}')";
-            $resultado = mysqli_query($db, $query);
+            $query = "INSERT INTO vendedores (nombre, apellido, telefono) VALUES (:nombre, :apellido, :telefono)";
+            $stmt = $db->prepare($query);
+            $resultado = $stmt->execute([
+                'nombre' => $nombre,
+                'apellido' => $apellido,
+                'telefono' => $telefono
+            ]);
 
             if($resultado) {
                 header('Location: /admin/vendedores/index.php?resultado=1');

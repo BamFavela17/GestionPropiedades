@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "gulp"
   },
-  "author": "Juan De la torre @codigoconjuan",
+  "author": "Abraham Favela",
   "license": "ISC",
   "devDependencies": {
     "glob": "^10.3.12",

@@ -15,7 +15,7 @@ $db = conectarDB();
 $queryVendedores = "SELECT * FROM vendedores";
 
 // Consultar la BD 
-$resultadoVendedores = mysqli_query($db, $queryVendedores);
+$resultadoVendedores = $db->query($queryVendedores);
 
 
 
@@ -33,8 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($id) {
         if ($tipo === 'vendedor') {
             // Eliminar el vendedor
-            $query = "DELETE FROM vendedores WHERE id = {$id}";
-            $resultado = mysqli_query($db, $query);
+            $stmt = $db->prepare("DELETE FROM vendedores WHERE id = :id");
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $resultado = $stmt->execute();
 
             if ($resultado) {
                 header("location: /admin/vendedores/index.php?resultado=3");
@@ -73,7 +74,7 @@ incluirTemplate('header');
         </thead>
 
         <tbody>
-            <?php while ($vendedor = mysqli_fetch_assoc($resultadoVendedores)): ?>
+            <?php while ($vendedor = $resultadoVendedores->fetch(PDO::FETCH_ASSOC)): ?>
                 <tr>
                     <td><?php echo $vendedor['id']; ?></td>
                     <td><?php echo $vendedor['nombre'] . " " . $vendedor['apellido']; ?></td>
@@ -95,8 +96,6 @@ incluirTemplate('header');
 
 <?php
 
-// Cerrar la conexion
-mysqli_close($db);
 
 incluirTemplate('footer');
 ?>
